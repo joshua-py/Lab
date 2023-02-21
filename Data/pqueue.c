@@ -58,15 +58,15 @@ void dequeue() {
         printf("Item is %d\n", queue[front].element);
         front = rear = -1;
     } else {
-        int largest_p = 0;
+        int largest_index = 0;
         int largest = queue[front].priority;
         for (int i = front + 1; i <= rear; i++) {
             if (queue[i].priority > largest)
                 largest = queue[i].priority;
-            largest_p = i;
+            largest_index = i;
         }
-        printf("Poped item is %d\n", queue[largest_p].element);
-        for (int i = largest_p; i > front; i--) {
+        printf("Poped item is %d\n", queue[largest_index].element);
+        for (int i = largest_index; i > front; i--) {
             queue[i].element = queue[i - 1].element;
             queue[i].priority = queue[i - 1].priority;
         }

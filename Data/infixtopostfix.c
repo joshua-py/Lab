@@ -1,92 +1,130 @@
-#include<stdio.h>
-#include<stdlib.h>  
-#include<string.h>
-#define MAX 100
+#include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
 
-char stack[MAX];
-char infix[MAX],postfix[MAX];
-int top=-1;
-int isEmpty() {
-   if(top == -1)
-      return 1;
-   else
-      return 0;
-}
-char pop() 
+//=======OPERATOR STACK=======//
+char operatorStack[100];
+int top = -1;
+
+//=====OPERATOR STACK FUNCTIONS=====//
+void OperatorStack_push(char ch)
 {
-   char key;
-   if(isEmpty()) {
-      key = stack[top];
-      top = top-1;   
-      return key;
-   } 
-   else {
-      printf("No data found, Stack is already empty.\n");
-   }
+    operatorStack[++top] = ch;
 }
-void push(char key) {
-   if(top!=MAX-1) {
-      top = top+1;   
-      stack[top] = key;
-   } else {
-      printf("Stack is already full.\n");
-   }
+
+char OperatorStack_pop()
+{
+    return operatorStack[top--];
 }
-int precedence(char symbol){
-    switch (symbol)
+
+char OperatorStack_peek()
+{
+    return operatorStack[top];
+}
+
+bool OperatorStack_isEmpty()
+{
+    return top == -1;
+}
+
+//========OTHER FUNCTIONS========//
+
+// To get precedence of current character
+int getPrecedence(char c)
+{
+    switch (c)
     {
-    case '+':
-    case '-':
-            return 1;break;
+    case '$':
+        return 4;
+    case '^':
+        return 3;
     case '*':
     case '/':
-        return 2;break;
-    case '^':
-        return 3;break;
+        return 2;
+    case '+':
+    case '-':
+        return 1;
     default:
-        return 0;
+        return -1;
     }
-
 }
-void infixtopostfix(){
-    char symbol,next;
-    int j=0;
-    for(int i=0;i<strlen(infix);i++){
-        symbol=infix[i];
-        switch(symbol){
-            case '(':
-                push(symbol);
-                break;
-            case ')':
-                while((next=pop())!='(')
-                    postfix[j++] = next;
-                break;                        
-            case '+':
-            case '-':
-            case '*':
-            case '/':
-            case '^':
-                while (!isEmpty() && precedence(stack[top])>=precedence(symbol))
-                    postfix[j++]=pop();
-                push(symbol);break;
-            default:
-                postfix[j++]=symbol;
 
+// To check higher precedence of two characters
+bool hasHigherPrecedence(char c1, char c2)
+{
+    return getPrecedence(c1) >= getPrecedence(c2);
+}
+
+// To check if current character is an Operand
+bool isOperand(char c)
+{
+    return ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9'));
+}
+
+// To check if opening bracket
+bool isOpeningBracket(char c)
+{
+    return c == '(' || c == '{' || c == '[';
+}
+
+// To check if closing bracket
+bool isClosingBracket(char c)
+{
+    return c == ')' || c == '}' || c == ']';
+}
+
+//=======INFIX TO POSTFIX CONVERTER========//
+void infix2postfix(char exp[])
+{
+    int n = strlen(exp);
+    char postfix[100]; // POSTFIX ARRAY
+    int k = 0;         // Index for postfix array
+    for (int i = 0; i < n; i++)
+    {
+        if (isOperand(exp[i])) // If current character is operand
+        {
+            postfix[k++] = exp[i]; // Then push to postfix
         }
-    
-        
-    }    
-    while (!isEmpty())
-        postfix[j++]=pop();
-    postfix[j]='\0';
+        else if (!isOpeningBracket(exp[i]) && !isClosingBracket(exp[i])) // If current character is operator (not brackets)
+        {
+            while (!OperatorStack_isEmpty() && !isOpeningBracket(OperatorStack_peek()) && hasHigherPrecedence(OperatorStack_peek(), exp[i])) // Checking precedence
+            {
+                postfix[k++] = OperatorStack_pop(); // If greater precedence, then pop and push top to postfix
+            }
+            OperatorStack_push(exp[i]); // If lower precedence, push to operator stack
+        }
+        else if (isOpeningBracket(exp[i])) // If opening bracket
+        {
+            OperatorStack_push(exp[i]); // Then push to operator stack
+        }
+        else if (isClosingBracket(exp[i])) // If closing bracket
+        {
+            while (!OperatorStack_isEmpty() && !isOpeningBracket(OperatorStack_peek())) // Till stack is empty and not opening bracket
+            {
+                postfix[k++] = OperatorStack_pop(); // pop operator stack and push to postfix
+            }
+            OperatorStack_pop(); // This is to pop the closing bracket
+        }
+    }
+    while (!OperatorStack_isEmpty()) // For the remaining element in operator stack (if any)
+    {
+        postfix[k++] = OperatorStack_pop(); // Simply pop and push it to the postfix
+    }
+    printf("\nPostfix expression\n"); // Printing postfix expression
+    for (int i = 0; i < k; i++)
+    {
+        printf("%c", postfix[i]);
+    }
 }
-int main(){
-    char str[MAX];
-    printf("Enter your expression: ");
-    scanf(" %s",str);
-    infixtopostfix();
-    for(int i=0;i<6;i++)
-        printf("%c",postfix[i]);
-        printf("sdfaaaaaaaaaaaaaaaaaaaaaa\n\n\n");
+
+//=======MAIN FUNCTION=======//
+int main()
+{
+    char exp[100]; // infix expression
+    printf("\nEnter infix expression without any spaces");
+    printf("\nFor unary - or +, use $. eg: a*-b must be entered as a*$b\n\n");
+    scanf("%s", exp);
+    infix2postfix(exp);
+
     return 0;
 }

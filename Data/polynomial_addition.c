@@ -88,7 +88,7 @@ int addPoly(struct poly p1[10],struct poly p2[10],int t1,int t2,struct poly p3[1
 void displayPoly(struct poly p[10],int term)
 {
 	int k;
-	for(k=0;k<term-1;k++)
+	for(k=0;k<term;k++)
 	printf("%d(x^%d)+",p[k].coeff,p[k].expo);
 	printf("%d(x^%d)",p[term-1].coeff,p[term-1].expo);
 }

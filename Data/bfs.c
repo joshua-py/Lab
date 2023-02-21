@@ -1,94 +1,217 @@
-#include <stdbool.h>
+// BFS algorithm in C
+
 #include <stdio.h>
 #include <stdlib.h>
+#define SIZE 40
 
-#define MAX_VERTICES 50
+struct queue {
+  int items[SIZE];
+  int front;
+  int rear;
+};
 
-// This struct represents a directed graph using
-// adjacency list representation
-typedef struct Graph_t {
-	int V; // No. of vertices
-	bool adj[MAX_VERTICES][MAX_VERTICES];
-} Graph;
+struct queue* createQueue();
+void enqueue(struct queue* q, int);
+int dequeue(struct queue* q);
+void display(struct queue* q);
+int isEmpty(struct queue* q);
+void printQueue(struct queue* q);
 
-// Constructor
-Graph* Graph_create(int V)
-{
-	Graph* g = malloc(sizeof(Graph));
-	g->V = V;
+struct node {
+  int vertex;
+  struct node* next;
+};
 
-	for (int i = 0; i < V; i++) {
-		for (int j = 0; j < V; j++) {
-			g->adj[i][j] = false;
-		}
-	}
+struct node* createNode(int);
 
-	return g;
+struct Graph {
+  int numVertices;
+  struct node** adjLists;
+  int* visited;
+};
+
+// BFS algorithm
+void bfs(struct Graph* graph, int startVertex) {
+  struct queue* q = createQueue();
+
+  graph->visited[startVertex] = 1;
+  enqueue(q, startVertex);
+
+  while (!isEmpty(q)) {
+    printQueue(q);
+    int currentVertex = dequeue(q);
+    printf("Visited %d\n", currentVertex);
+
+    struct node* temp = graph->adjLists[currentVertex];
+
+    while (temp) {
+      int adjVertex = temp->vertex;
+
+      if (graph->visited[adjVertex] == 0) {
+        graph->visited[adjVertex] = 1;
+        enqueue(q, adjVertex);
+      }
+      temp = temp->next;
+    }
+  }
 }
 
-// Destructor
-void Graph_destroy(Graph* g) { free(g); }
-
-// function to add an edge to graph
-void Graph_addEdge(Graph* g, int v, int w)
-{
-	g->adj[v][w] = true; // Add w to v’s list.
+// Creating a node
+struct node* createNode(int v) {
+  struct node* newNode = malloc(sizeof(struct node));
+  newNode->vertex = v;
+  newNode->next = NULL;
+  return newNode;
 }
 
-// prints BFS traversal from a given source s
-void Graph_BFS(Graph* g, int s)
-{
-	// Mark all the vertices as not visited
-	bool visited[MAX_VERTICES];
-	for (int i = 0; i < g->V; i++) {
-		visited[i] = false;
-	}
+// Creating a graph
+struct Graph* createGraph(int vertices) {
+  struct Graph* graph = malloc(sizeof(struct Graph));
+  graph->numVertices = vertices;
 
-	// Create a queue for BFS
-	int queue[MAX_VERTICES];
-	int front = 0, rear = 0;
+  graph->adjLists = malloc(vertices * sizeof(struct node*));
+  graph->visited = malloc(vertices * sizeof(int));
 
-	// Mark the current node as visited and enqueue it
-	visited[s] = true;
-	queue[rear++] = s;
+  int i;
+  for (i = 0; i < vertices; i++) {
+    graph->adjLists[i] = NULL;
+    graph->visited[i] = 0;
+  }
 
-	while (front != rear) {
-		// Dequeue a vertex from queue and print it
-		s = queue[front++];
-		printf("%d ", s);
-
-		// Get all adjacent vertices of the dequeued
-		// vertex s. If a adjacent has not been visited,
-		// then mark it visited and enqueue it
-		for (int adjecent = 0; adjecent < g->V;adjecent++) {
-			if (g->adj[s][adjecent] && !visited[adjecent]) {
-				visited[adjecent] = true;
-				queue[rear++] = adjecent;
-			}
-		}
-	}
+  return graph;
 }
 
-// Driver program to test methods of graph struct
-int main()
-{
-	// Create a graph given in the above diagram
-	Graph* g = Graph_create(7);
-	Graph_addEdge(g, 0, 1);
-	Graph_addEdge(g, 0, 2);
-	Graph_addEdge(g, 1, 2);
-	Graph_addEdge(g, 1, 4);
-	Graph_addEdge(g, 1, 6);
-	Graph_addEdge(g, 2, 3);
-	Graph_addEdge(g, 2, 5);
-	Graph_addEdge(g, 3, 5);
-	Graph_addEdge(g, 3, 6);
+// Add edge
+void addEdge(struct Graph* graph, int src, int dest) {
+  // Add edge from src to dest
+  struct node* newNode = createNode(dest);
+  newNode->next = graph->adjLists[src];
+  graph->adjLists[src] = newNode;
 
-	printf("Following is Breadth First Traversal "
-		"(starting from vertex 2) \n");
-	Graph_BFS(g, 0);
-
-	Graph_destroy(g);
-
-	return 0;
+  // Add edge from dest to src
+  newNode = createNode(src);
+  newNode->next = graph->adjLists[dest];
+  graph->adjLists[dest] = newNode;
 }
+
+// Create a queue
+struct queue* createQueue() {
+  struct queue* q = malloc(sizeof(struct queue));
+  q->front = -1;
+  q->rear = -1;
+  return q;
+}
+
+// Check if the queue is empty
+int isEmpty(struct queue* q) {
+  if (q->rear == -1)
+    return 1;
+  else
+    return 0;
+}
+
+// Adding elements into queue
+void enqueue(struct queue* q, int value) {
+  if (q->rear == SIZE - 1)
+    printf("\nQueue is Full!!");
+  else {
+    if (q->front == -1)
+      q->front = 0;
+    q->rear++;
+    q->items[q->rear] = value;
+  }
+}
+
+// Removing elements from queue
+int dequeue(struct queue* q) {
+  int item;
+  if (isEmpty(q)) {
+    printf("Queue is empty");
+    item = -1;
+  } else {
+    item = q->items[q->front];
+    q->front++;
+    if (q->front > q->rear) {
+      printf("Resetting queue ");
+      q->front = q->rear = -1;
+    }
+  }
+  return item;
+}
+
+// Print the queue
+void printQueue(struct queue* q) {
+  int i = q->front;
+
+  if (isEmpty(q)) {
+    printf("Queue is empty");
+  } else {
+    printf("\nQueue contains \n");
+    for (i = q->front; i < q->rear + 1; i++) {
+      printf("%d ", q->items[i]);
+    }
+  }
+}
+void printGraph(struct Graph* graph) {
+  int v;
+  for (v = 0; v < graph->numVertices; v++) {
+    struct node* temp = graph->adjLists[v];
+    printf("\n Adjacency list of vertex %d\n ", v);
+    while (temp) {
+      printf("%d -> ", temp->vertex);
+      temp = temp->next;
+    }
+    printf("\n");
+  }
+}
+int main() {
+  struct Graph* graph = createGraph(7);
+ addEdge(graph, 0, 1);
+  addEdge(graph, 0, 2);
+  addEdge(graph, 1, 2);
+  addEdge(graph, 1, 4);
+  addEdge(graph, 1, 6);
+  addEdge(graph, 2, 3);
+  addEdge(graph, 2, 5);
+  addEdge(graph, 3, 5);
+  addEdge(graph, 3, 6);
+  printGraph(graph);
+  bfs(graph, 0);
+
+  return 0;
+}
+/*
+
+ Adjacency list of vertex 0
+ 2 -> 1 -> 
+
+ Adjacency list of vertex 1
+ 3 -> 4 -> 2 -> 0 -> 
+
+ Adjacency list of vertex 2
+ 4 -> 1 -> 0 -> 
+
+ Adjacency list of vertex 3
+ 4 -> 1 -> 
+
+ Adjacency list of vertex 4
+ 3 -> 2 -> 1 -> 
+
+ Adjacency list of vertex 5
+ 
+
+Queue contains 
+0 Resetting queue Visited 0
+
+Queue contains 
+2 1 Visited 2
+
+Queue contains 
+1 4 Visited 1
+
+Queue contains 
+4 3 Visited 4
+
+Queue contains 
+3 Resetting queue Visited 3
+*/

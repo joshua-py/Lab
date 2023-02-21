@@ -108,3 +108,33 @@ int main() {
 
   return 0;
 }
+
+
+/* Adjacency list of vertex 0
+ 2 -> 1 -> 
+
+ Adjacency list of vertex 1
+ 6 -> 4 -> 2 -> 0 -> 
+
+ Adjacency list of vertex 2
+ 5 -> 3 -> 1 -> 0 -> 
+
+ Adjacency list of vertex 3
+ 6 -> 5 -> 2 -> 
+
+ Adjacency list of vertex 4
+ 1 -> 
+
+ Adjacency list of vertex 5
+ 3 -> 2 -> 
+
+ Adjacency list of vertex 6
+ 3 -> 1 -> 
+Visited 0 
+Visited 2 
+Visited 5 
+Visited 3 
+Visited 6 
+Visited 1 
+Visited 4 
+*/
