@@ -1,8 +1,9 @@
+
 public class Armstrong {
 
     public static void main(String[] args) {
 
-        int number = 1634, originalNumber, remainder, result = 0, n = 0;
+        int number = 23, originalNumber, remainder, result = 0, n = 0;
 
         originalNumber = number;
 
